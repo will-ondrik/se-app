@@ -31,8 +31,6 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules",
-    "app/_legacy/**",
-    "src/components/ToolsMap.tsx"
+    "node_modules"
   ]
 }
