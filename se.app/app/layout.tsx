@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BizStride OS",
+  title: "Straight Edge",
   description: "Migrated to Next.js app router",
 };
 
