@@ -1,4 +1,4 @@
-import { Job } from "@/types";
+import { Job } from "@/types/forecasting/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { X, Calendar, DollarSign, Clock, MapPin, User } from "lucide-react";

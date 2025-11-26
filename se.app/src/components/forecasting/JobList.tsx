@@ -1,4 +1,4 @@
-import { Job } from "@/types";
+import { Job } from "@/types/forecasting/types";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";

@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 
-export function Dialog({ children }: { children: React.ReactNode }) {
+export function Dialog({ children, open, onOpenChange }: { children: React.ReactNode; open?: boolean; onOpenChange?: (open: boolean) => void; }) {
+  // Simple stub; ignores open state but keeps type compatibility
   return <div>{children}</div>;
 }
 export function DialogTrigger({ asChild, children, ...props }: { asChild?: boolean; children: React.ReactNode } & React.HTMLAttributes<HTMLElement>) {

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Project } from "@/types/project";
+import { Project } from "@/types/kpi_dashboard/types";
 import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import { useMemo } from "react";
 import { InfoTooltip } from "./InfoTooltip";

@@ -11,6 +11,8 @@ export type ToastProps = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  // Optional styling hint used by various components
+  variant?: 'default' | 'destructive';
 };
 
 // Optional: placeholder components if you later want to render a custom toast UI.

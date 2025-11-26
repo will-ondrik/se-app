@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Job, Client, Crew } from "@/types";
+import { Job, Client, Crew } from "@/types/forecasting/types";
 import {
   Dialog,
   DialogContent,

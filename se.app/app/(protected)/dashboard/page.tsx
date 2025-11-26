@@ -37,10 +37,6 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Briefcase className="mr-2 h-4 w-4" />
-          Create Job
-        </Button>
       </div>
 
       {completedSteps < onboardingSteps.length && (

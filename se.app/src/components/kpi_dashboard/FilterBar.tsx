@@ -25,7 +25,7 @@ import { CalendarIcon, X, Check, ChevronsUpDown } from "lucide-react";
 import { format, subDays, subMonths, subQuarters, subYears, startOfYear } from "date-fns";
 import { cn } from "@/lib/utils";
 import { projects } from "@/lib/projectData";
-import { Project } from "@/types/project";
+import { Project } from "@/types/kpi_dashboard/types";
 
 interface FilterBarProps {
   onFilterChange: (filters: any) => void;
@@ -220,7 +220,7 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
                   <CommandItem
                     key={clientName}
                     value={clientName}
-                    onSelect={(currentValue) => {
+                    onSelect={(currentValue: string) => {
                       setClient(currentValue);
                       setOpenClient(false);
                       setTimeout(() => emitFilters(), 0);
@@ -279,7 +279,7 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
                   <CommandItem
                     key={leaderName}
                     value={leaderName}
-                    onSelect={(currentValue) => {
+                    onSelect={(currentValue: string) => {
                       setLeader(currentValue);
                       setOpenLeader(false);
                       setTimeout(() => emitFilters(), 0);

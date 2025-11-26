@@ -1,0 +1,9 @@
+Navbar
+- fix
+
+Toasts
+- register
+- login
+- logout
+- error messages
+

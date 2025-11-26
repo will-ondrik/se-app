@@ -7,7 +7,7 @@ import { MainLayout } from '@/components/layouts/MainLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading, hasRole } = useAuth();
   const pathname = usePathname();
 
   if (isLoading) {
@@ -21,6 +21,17 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   if (!session) {
     // Preserve intent: go to login and then back if desired later
     redirect('/login');
+  }
+
+  // Management role path restrictions: allow only /schedule, /team, /reports
+  if (session && hasRole('MANAGEMENT')) {
+    const allowed =
+      pathname.startsWith('/schedule') ||
+      pathname.startsWith('/team') ||
+      pathname.startsWith('/reports');
+    if (!allowed) {
+      redirect('/unauthorized');
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { Job, Crew } from "@/types";
+import { Job, Crew } from "@/types/forecasting/types";
 import { format, eachDayOfInterval, isSameDay } from "date-fns";
 
 interface CapacityStripProps {

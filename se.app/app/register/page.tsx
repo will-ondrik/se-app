@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,24 +11,38 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 
-export default function Register() {
+export default function RegisterInvited() {
+  const searchParams = useSearchParams();
+  const initialToken = useMemo(() => searchParams.get('token') || '', [searchParams]);
   const [formData, setFormData] = useState({
-    email: '',
+    token: initialToken,
     password: '',
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    company: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { registerInvited } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const t = searchParams.get('token');
+    if (t && !formData.token) {
+      setFormData((prev) => ({ ...prev, token: t }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.token) {
+      toast({ title: 'Error', description: 'Invitation token is required' });
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       toast({ title: 'Error', description: 'Passwords do not match' });
@@ -37,19 +51,18 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await register({
-        email: formData.email,
+      await registerInvited({
+        token: formData.token,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        company: formData.company,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
       });
-      toast({ title: 'Success', description: 'Account created successfully' });
+      toast({ title: "Success", description: "You're all set!" });
       router.push('/dashboard');
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create account',
+        description: error instanceof Error ? error.message : 'Failed to accept invite',
       });
     } finally {
       setIsLoading(false);
@@ -62,37 +75,32 @@ export default function Register() {
 
   return (
     <AuthLayout
-      title="Create account"
-      description="Start your StraightEdge trial"
+      title="Join your company"
+      description="Complete your account setup"
       footer={
         <span>
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-primary hover:underline">
-            Log in
+          Not invited yet?{' '}
+          <Link href="/register-first" className="font-medium text-primary hover:underline">
+            Create a new company
           </Link>
         </span>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="token">Invitation token</Label>
+          <Input id="token" value={formData.token} onChange={handleChange} required disabled={isLoading} />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
-            <Input id="firstName" value={formData.firstName} onChange={handleChange} required disabled={isLoading} />
+            <Label htmlFor="firstName">First name (optional)</Label>
+            <Input id="firstName" value={formData.firstName} onChange={handleChange} disabled={isLoading} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input id="lastName" value={formData.lastName} onChange={handleChange} required disabled={isLoading} />
+            <Label htmlFor="lastName">Last name (optional)</Label>
+            <Input id="lastName" value={formData.lastName} onChange={handleChange} disabled={isLoading} />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleChange} required disabled={isLoading} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="company">Company</Label>
-          <Input id="company" value={formData.company} onChange={handleChange} required disabled={isLoading} />
         </div>
 
         <div className="space-y-2">
@@ -126,7 +134,7 @@ export default function Register() {
         </div>
 
         <Button type="submit" className="h-11 w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Create account
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Accept invite
         </Button>
       </form>
     </AuthLayout>

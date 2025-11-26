@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Project } from "@/types/project";
+import { Project } from "@/types/kpi_dashboard/types";
 import { Trophy, TrendingUp, TrendingDown, ArrowUpDown, DollarSign, Target, Zap, Clock } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 

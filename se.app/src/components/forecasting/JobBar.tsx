@@ -1,4 +1,4 @@
-import { Job } from "@/types";
+import { Job } from "@/types/forecasting/types";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 

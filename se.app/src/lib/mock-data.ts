@@ -117,7 +117,18 @@ export const mockTools: Tool[] = [
   },
 ];
 
-export const mockNotifications = [
-  { id: 'n1', title: 'Tool returned', message: 'Sander returned and available', createdAt: new Date().toISOString(), read: false },
-  { id: 'n2', title: 'Job status', message: 'Maple St moved to In Progress', createdAt: new Date().toISOString(), read: true },
-];
+export const mockCurrentUser: User = {
+  id: mockUsers[0].id,
+  companyId: mockUsers[0].companyId,
+  firstName: mockUsers[0].firstName,
+  lastName: mockUsers[0].lastName,
+  email: mockUsers[0].email,
+  roles: mockUsers[0].roles,
+  permissions: mockUsers[0].permissions,
+};
+
+/**
+ * Notifications mock removed. Keep an empty export to avoid accidental UI usage.
+ * Real implementations should fetch notifications from the API.
+ */
+export const mockNotifications: any[] = [];

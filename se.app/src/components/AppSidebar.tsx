@@ -10,7 +10,8 @@ import {
   ChevronDown,
   TrendingUp,
   LineChart,
-  PieChart
+  PieChart,
+  Building2
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
@@ -46,8 +47,10 @@ const mainItems: MainItem[] = [
   { title: "Jobs", url: "/jobs", icon: Briefcase, permission: "VIEW_JOBS" },
   { title: "Schedule", url: "/schedule", icon: Calendar },
   { title: "Tools", url: "/tools", icon: Wrench, permission: "VIEW_TOOLS" },
+  { title: "Forecasting", url: "/forecasting", icon: LineChart },
   { title: "Team", url: "/team", icon: Users, permission: "MANAGE_USERS" },
   { title: "Chat", url: "/chat", icon: MessageSquare },
+  { title: "Company Profile", url: "/company-profile", icon: Building2 },
   { title: "Settings", url: "/settings", icon: Settings, permission: "MANAGE_SETTINGS" },
 ];
 
@@ -59,7 +62,7 @@ const reportsItems = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
-  const { hasPermission, hasAnyRole } = useAuth();
+  const { hasPermission, hasAnyRole, hasRole } = useAuth();
   const [reportsOpen, setReportsOpen] = useState(true);
 
   const itemBase = cn(
@@ -71,13 +74,17 @@ export function AppSidebar() {
     open ? '' : 'justify-center px-2'
   );
 
-  const visibleMainItems = mainItems.filter(item => {
-    const hasPerm = !item.permission || hasPermission(item.permission);
-    const hasRole = !item.roles || item.roles.length === 0 || hasAnyRole(item.roles);
-    return hasPerm && hasRole;
-  });
+  const isManagement = hasRole('MANAGEMENT');
 
-  const canViewReports = hasPermission("VIEW_REPORTS");
+  const visibleMainItems = isManagement
+    ? mainItems.filter(item => ['Schedule', 'Team'].includes(item.title))
+    : mainItems.filter(item => {
+        const hasPerm = !item.permission || hasPermission(item.permission);
+        const hasRoleOk = !item.roles || item.roles.length === 0 || hasAnyRole(item.roles);
+        return hasPerm && hasRoleOk;
+      });
+
+  const canViewReports = isManagement || hasPermission("VIEW_REPORTS");
 
   return (
     <Sidebar collapsible="icon">

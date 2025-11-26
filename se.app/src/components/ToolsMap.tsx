@@ -1,8 +1,10 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Tool } from '@/types';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 interface ToolsMapProps {
   tools: Tool[];
@@ -13,7 +15,7 @@ export function ToolsMap({ tools, mapboxToken }: ToolsMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const navigate = useNavigate();
+  const router = useRouter();
   const [mapError, setMapError] = useState<string>("");
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export function ToolsMap({ tools, mapboxToken }: ToolsMapProps) {
             .addTo(map.current!);
 
           markerElement.addEventListener('click', () => {
-            navigate(`/tools/${tool.id}`);
+            router.push(`/tools/${tool.id}`);
           });
 
           markersRef.current.push(marker);
@@ -102,7 +104,7 @@ export function ToolsMap({ tools, mapboxToken }: ToolsMapProps) {
       markersRef.current.forEach(marker => marker.remove());
       map.current?.remove();
     };
-  }, [tools, mapboxToken, navigate]);
+  }, [tools, mapboxToken, router]);
 
   if (!mapboxToken) {
     return (

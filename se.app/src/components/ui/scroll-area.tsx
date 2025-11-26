@@ -3,10 +3,13 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export function ScrollArea({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('overflow-auto', className)} {...props}>
-      {children}
-    </div>
-  );
-}
+export const ScrollArea = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className = '', children, ...props }, ref) => {
+    return (
+      <div ref={ref} className={cn('overflow-auto', className)} {...props}>
+        {children}
+      </div>
+    );
+  }
+);
+ScrollArea.displayName = 'ScrollArea';

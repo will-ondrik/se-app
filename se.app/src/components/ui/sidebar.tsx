@@ -53,7 +53,10 @@ export function SidebarMenuItem({ className = '', ...props }: React.HTMLAttribut
   return <li className={cn('', className)} {...props} />;
 }
 export function SidebarMenuButton({ className = '', asChild = false, ...props }: React.HTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
-  if (asChild) return <button className={cn('w-full text-left', className)} {...(props as any)} />;
+  if (asChild) {
+    const { children, ...rest } = props as any;
+    return <>{children}</>;
+  }
   return <button className={cn('w-full text-left', className)} {...props} />;
 }
 export function SidebarMenuSub({ className = '', ...props }: React.HTMLAttributes<HTMLUListElement>) {
@@ -63,7 +66,10 @@ export function SidebarMenuSubItem({ className = '', ...props }: React.HTMLAttri
   return <li className={cn('', className)} {...props} />;
 }
 export function SidebarMenuSubButton({ className = '', asChild = false, ...props }: React.HTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
-  if (asChild) return <button className={cn('w-full text-left text-sm', className)} {...(props as any)} />;
+  if (asChild) {
+    const { children, ...rest } = props as any;
+    return <>{children}</>;
+  }
   return <button className={cn('w-full text-left text-sm', className)} {...props} />;
 }
 

@@ -1,4 +1,4 @@
-import { DateRangeOption } from "@/types";
+import { DateRangeOption } from "@/types/forecasting/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

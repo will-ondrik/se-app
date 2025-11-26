@@ -1,4 +1,4 @@
-import { Job } from "@/types";
+import { Job } from "@/types/forecasting/types";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";

@@ -1,4 +1,4 @@
-import { Job, Crew } from "@/types";
+import { Job, Crew } from "@/types/forecasting/types";
 import { format, eachDayOfInterval, differenceInDays, addDays } from "date-fns";
 import { JobBar } from "./JobBar";
 import { ScrollArea } from "@/components/ui/scroll-area";

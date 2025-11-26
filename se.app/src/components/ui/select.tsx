@@ -9,9 +9,29 @@ type SelectContextType = {
 
 const SelectContext = React.createContext<SelectContextType>({});
 
-export function Select({ value, onValueChange, children }: { value?: string; onValueChange?: (v: string) => void; children: React.ReactNode }) {
+type SelectProps = {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (v: string) => void;
+  children: React.ReactNode;
+};
+
+export function Select({ value, defaultValue, onValueChange, children }: SelectProps) {
+  const [internalValue, setInternalValue] = React.useState<string | undefined>(defaultValue);
+
+  // If controlled, prefer the value prop; otherwise use internal state
+  const effectiveValue = value !== undefined ? value : internalValue;
+
+  const handleChange = (v: string) => {
+    if (onValueChange) {
+      onValueChange(v);
+    } else {
+      setInternalValue(v);
+    }
+  };
+
   return (
-    <SelectContext.Provider value={{ value, onValueChange }}>
+    <SelectContext.Provider value={{ value: effectiveValue, onValueChange: handleChange }}>
       {children}
     </SelectContext.Provider>
   );
@@ -38,7 +58,10 @@ export function SelectContent({ className = '', children, ...props }: React.HTML
   );
 }
 
-export function SelectItem({ value, children, className = '', ...props }: { value: string; children: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
+export function SelectItem(
+  { value, children, className = '', ...props }:
+  { value: string; children: React.ReactNode } & React.HTMLAttributes<HTMLDivElement>
+) {
   const ctx = React.useContext(SelectContext);
   const handleClick = () => ctx.onValueChange?.(value);
   return (

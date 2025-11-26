@@ -1,4 +1,4 @@
-import { Crew } from "@/types";
+import { Crew } from "@/types/forecasting/types";
 import {
   Select,
   SelectContent,

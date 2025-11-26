@@ -45,7 +45,7 @@ export default function Login() {
       footer={
         <span>
           Don't have an account?{' '}
-          <Link href="/register" className="font-medium text-primary hover:underline">
+          <Link href="/register-first" className="font-medium text-primary hover:underline">
             Sign up
           </Link>
         </span>
@@ -76,7 +76,7 @@ export default function Login() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="#" className="text-xs text-primary hover:underline">
+            <Link href="/reset-password" className="text-xs text-primary hover:underline">
               Forgot password?
             </Link>
           </div>
