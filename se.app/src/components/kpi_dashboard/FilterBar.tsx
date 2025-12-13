@@ -24,10 +24,10 @@ import {
 import { CalendarIcon, X, Check, ChevronsUpDown } from "lucide-react";
 import { format, subDays, subMonths, subQuarters, subYears, startOfYear } from "date-fns";
 import { cn } from "@/lib/utils";
-import { projects } from "@/lib/projectData";
 import { Project } from "@/types/kpi_dashboard/types";
 
 interface FilterBarProps {
+  projects: Project[];
   onFilterChange: (filters: any) => void;
 }
 
@@ -40,7 +40,7 @@ const datePresets = [
   { label: "Custom", value: "custom" },
 ];
 
-export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
+export const FilterBar = ({ projects, onFilterChange }: FilterBarProps) => {
   const [datePreset, setDatePreset] = useState("all");
   const [dateRange, setDateRange] = useState<{ from: Date | null; to: Date | null }>({
     from: null,
@@ -60,7 +60,7 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
       clients.add(project.clientName.name);
     });
     return Array.from(clients).sort();
-  }, []);
+  }, [projects]);
 
   const uniqueLeaders = useMemo(() => {
     const leaders = new Set<string>();
@@ -68,7 +68,37 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
       leaders.add(`${project.lead.firstName} ${project.lead.lastName}`);
     });
     return Array.from(leaders).sort();
-  }, []);
+  }, [projects]);
+
+  // Label maps for Selects
+  const periodLabelMap = useMemo(
+    () => Object.fromEntries(datePresets.map((p) => [p.value, p.label] as const)),
+    []
+  );
+
+  const businessTypeLabels = useMemo(
+    () => ({
+      all: "All Types",
+      cabinets: "Cabinets",
+      commercial: "Commercial",
+      "customer service": "Customer Service",
+      exteriors: "Exteriors",
+      "new construction": "New Construction",
+      renovations: "Renovations",
+      repaint: "Repaint",
+      shop: "Shop",
+    }),
+    []
+  );
+
+  const billingLabels = useMemo(
+    () => ({
+      all: "All Billing",
+      Quote: "Quote",
+      "Cost Plus": "Cost Plus",
+    }),
+    []
+  );
 
   const handlePresetChange = (preset: string) => {
     setDatePreset(preset);
@@ -132,9 +162,10 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
     <div className="flex flex-wrap gap-3 p-4 bg-card rounded-lg border border-border/50 shadow-sm">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground">Period:</span>
-        <Select value={datePreset} onValueChange={handlePresetChange}>
-          <SelectTrigger className="w-[140px] bg-background">
-            <SelectValue />
+        <Select value={datePreset} onValueChange={handlePresetChange} valueToLabel={periodLabelMap}>
+          <SelectTrigger className="w-[140px] h-9 bg-background border border-border rounded-md px-3 flex items-center justify-between">
+            <span className="truncate"><SelectValue /></span>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border z-50">
             {datePresets.map((preset) => (
@@ -306,9 +337,11 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
           setBusinessType(value);
           setTimeout(() => emitFilters(), 0);
         }}
+        valueToLabel={businessTypeLabels}
       >
-        <SelectTrigger className="w-[180px] bg-background">
-          <SelectValue placeholder="All Types" />
+        <SelectTrigger className="w-[180px] h-9 bg-background border border-border rounded-md px-3 flex items-center justify-between">
+          <span className="truncate"><SelectValue placeholder="All Types" /></span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </SelectTrigger>
         <SelectContent className="bg-popover border-border z-50">
           <SelectItem value="all">All Types</SelectItem>
@@ -329,9 +362,11 @@ export const FilterBar = ({ onFilterChange }: FilterBarProps) => {
           setBillingType(value);
           setTimeout(() => emitFilters(), 0);
         }}
+        valueToLabel={billingLabels}
       >
-        <SelectTrigger className="w-[160px] bg-background">
-          <SelectValue placeholder="All Billing" />
+        <SelectTrigger className="w-[160px] h-9 bg-background border border-border rounded-md px-3 flex items-center justify-between">
+          <span className="truncate"><SelectValue placeholder="All Billing" /></span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </SelectTrigger>
         <SelectContent className="bg-popover border-border z-50">
           <SelectItem value="all">All Billing</SelectItem>

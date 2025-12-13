@@ -1,29 +1,47 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import { Briefcase, Wrench, Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InfoTooltip } from "@/components/InfoTooltip";
-import { mockJobs, mockTools, mockUsers } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
-import { getStatusBadgeColor } from "@/lib/mock-data";
+import { getStatusBadgeColor } from "@/lib/ui-mappers";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import type { Permission } from "@/types/app/types";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Permission, Job, Tool, User } from "@/types/app/types";
+import { fetchJobs, fetchTools, fetchUsers } from "@/services/app-data";
 
 export default function Dashboard() {
   const router = useRouter();
-  const activeJobs = mockJobs.filter(j => j.status === "IN_PROGRESS").length;
-  const scheduledJobs = mockJobs.filter(j => j.status === "SCHEDULED").length;
-  const availableTools = mockTools.filter(t => t.isAvailable).length;
-  const totalTools = mockTools.length;
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([fetchJobs(), fetchTools(), fetchUsers()]).then(([j, t, u]) => {
+      if (!mounted) return;
+      setJobs(Array.isArray(j) ? j : []);
+      setTools(Array.isArray(t) ? t : []);
+      setUsers(Array.isArray(u) ? u : []);
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const activeJobs = jobs.filter(j => j.status === "IN_PROGRESS").length;
+  const scheduledJobs = jobs.filter(j => j.status === "SCHEDULED").length;
+  const availableTools = tools.filter(t => t.isAvailable).length;
+  const totalTools = tools.length;
 
   const onboardingSteps = [
     { id: 1, title: "Complete Company Profile", done: false, path: "/company-profile" },
     { id: 2, title: "Add a Tool Category", done: false, path: "/categories" },
     { id: 3, title: "Add Your First Tool", done: totalTools > 0, path: "/tools" },
-    { id: 4, title: "Invite a Team Member", done: mockUsers.length > 1, path: "/team" },
+    { id: 4, title: "Invite a Team Member", done: users.length > 1, path: "/team" },
   ];
 
   const completedSteps = onboardingSteps.filter(s => s.done).length;
@@ -35,7 +53,9 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
+          <p className="text-muted-foreground">
+            Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! Here's what's happening today.
+          </p>
         </div>
       </div>
 
@@ -118,7 +138,7 @@ export default function Dashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{mockUsers.length}</div>
+            <div className="text-2xl font-bold text-foreground">{users.length}</div>
             <p className="text-xs text-muted-foreground">All active</p>
           </CardContent>
         </Card>
@@ -146,7 +166,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockJobs.slice(0, 3).map((job) => (
+              {jobs.slice(0, 3).map((job) => (
                 <div key={job.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{job.name}</p>
@@ -168,7 +188,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockTools.slice(0, 3).map((tool) => (
+              {tools.slice(0, 3).map((tool) => (
                 <div key={tool.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{tool.name}</p>

@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
-import { mockCurrentUser } from "@/lib/mock-data";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   return (
     <div className="space-y-6">
       <div>
@@ -50,16 +51,16 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" defaultValue={mockCurrentUser.firstName} />
+                  <Input id="firstName" defaultValue={user?.firstName ?? ""} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" defaultValue={mockCurrentUser.lastName} />
+                  <Input id="lastName" defaultValue={user?.lastName ?? ""} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={mockCurrentUser.email} />
+                <Input id="email" type="email" defaultValue={user?.email ?? ""} />
               </div>
               <Button className="bg-primary hover:bg-primary/90">Save Changes</Button>
             </CardContent>
@@ -79,7 +80,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="companyId">Company ID</Label>
-                <Input id="companyId" defaultValue={mockCurrentUser.companyId} disabled />
+                <Input id="companyId" defaultValue={user?.companyId ?? ""} disabled />
               </div>
               <Button className="bg-primary hover:bg-primary/90">Save Changes</Button>
             </CardContent>

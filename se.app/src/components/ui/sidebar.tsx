@@ -8,7 +8,8 @@ type SidebarContextType = { open: boolean; setOpen: (v: boolean) => void };
 const SidebarContext = React.createContext<SidebarContextType | null>(null);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(true);
+  // Collapse navigation by default on all pages
+  const [open, setOpen] = React.useState(false);
   return <SidebarContext.Provider value={{ open, setOpen }}>{children}</SidebarContext.Provider>;
 }
 

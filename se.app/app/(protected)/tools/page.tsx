@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Search, Filter, QrCode, Map, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { mockTools, getConditionBadgeColor } from "@/lib/mock-data";
+import { getConditionBadgeColor } from "@/lib/ui-mappers";
+import { fetchTools } from "@/services/app-data";
+import type { Tool } from "@/types/app/types";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { useRouter } from "next/navigation";
 import { ToolsMap } from "@/components/ToolsMap";
@@ -30,11 +32,28 @@ export default function Tools() {
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"table" | "map">("table");
   const [mapboxToken, setMapboxToken] = useState<string>("");
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
+  // Load tools from API
+  useEffect(() => {
+    let mounted = true;
+    fetchTools()
+      .then((data) => {
+        if (mounted) setTools(Array.isArray(data) ? data : []);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filteredTools = availabilityFilter === "all" 
-    ? mockTools 
-    : mockTools.filter(t => availabilityFilter === "available" ? t.isAvailable : !t.isAvailable);
+    ? tools 
+    : tools.filter(t => availabilityFilter === "available" ? t.isAvailable : !t.isAvailable);
 
   return (
     <div className="space-y-6">

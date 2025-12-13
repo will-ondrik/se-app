@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, TrendingUp } from "lucide-react";
@@ -15,8 +15,9 @@ import { ProjectsTable } from "@/components/kpi_dashboard/ProjectsTable";
 import { ProjectDetailModal } from "@/components/kpi_dashboard/ProjectDetailModal";
 import { AdvancedAnalytics } from "@/components/kpi_dashboard/AdvancedAnalytics";
 import { TeamLeadersAnalytics } from "@/components/kpi_dashboard/TeamLeadersAnalytics";
-import { projects, filterProjects } from "@/lib/projectData";
+import { filterProjects } from "@/lib/projectFilters";
 import { Project } from "@/types/project";
+import { getKpiProjects } from "@/services/api";
 
 export default function KpiAnalyticsReportsPage() {
   const [filters, setFilters] = useState<any>({
@@ -28,6 +29,9 @@ export default function KpiAnalyticsReportsPage() {
   });
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Chart refs for PDF generation
   const revenueChartRef = useRef<HTMLDivElement>(null);
@@ -35,9 +39,34 @@ export default function KpiAnalyticsReportsPage() {
   const businessMixChartRef = useRef<HTMLDivElement>(null);
   const labourChartRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await getKpiProjects();
+        if (!cancelled) {
+          setProjects(data ?? []);
+          setError(null);
+        }
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) {
+          setProjects([]);
+          setError("Failed to load data");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredProjects = useMemo(
     () => filterProjects(projects, filters),
-    [filters]
+    [projects, filters]
   );
 
   // KPIs
@@ -305,7 +334,16 @@ export default function KpiAnalyticsReportsPage() {
 
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Filters */}
-        <FilterBar onFilterChange={setFilters} />
+        <FilterBar projects={projects} onFilterChange={setFilters} />
+        {!loading && (error || projects.length === 0) && (
+          <div
+            className={`rounded-md border p-3 text-sm ${
+              error ? 'border-destructive/50 text-destructive' : 'border-border/50 text-muted-foreground'
+            }`}
+          >
+            {error ? 'Data unavailable. Failed to load KPI data.' : 'Data unavailable. No KPI data returned.'}
+          </div>
+        )}
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-muted">

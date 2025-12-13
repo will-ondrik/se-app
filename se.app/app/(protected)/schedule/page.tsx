@@ -1,7 +1,7 @@
 'use client';
 
-import Forecast from '../forecasting/page';
+import SchedulePage from '@/components/schedule/SchedulePage';
 
-export default function SchedulePage() {
-  return <Forecast />;
+export default function Page() {
+  return <SchedulePage />;
 }

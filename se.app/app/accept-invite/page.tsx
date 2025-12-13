@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/layouts/AuthLayout";
 import Link from "next/link";
-import { getInvitePreview, type InvitePreview } from "@/services/api";
+import { getPendingInviteDetails, type PendingInviteDetails } from "@/services/api";
 
 export default function AcceptInvite() {
   const searchParams = useSearchParams();
@@ -26,9 +26,9 @@ export default function AcceptInvite() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
-  const [preview, setPreview] = useState<InvitePreview | null>(null);
-  const [previewState, setPreviewState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  const [preview, setPreview] = useState<PendingInviteDetails | null>(null);
 
   const { registerInvited } = useAuth();
   const router = useRouter();
@@ -46,12 +46,9 @@ export default function AcceptInvite() {
   useEffect(() => {
     const t = formData.token;
     if (!t) return;
-    setPreviewState("loading");
-    getInvitePreview(t)
+    getPendingInviteDetails(t)
       .then((data) => {
         setPreview(data);
-        setPreviewState("loaded");
-        // Optionally prefill names from invite if none set yet
         setFormData((prev) => ({
           ...prev,
           firstName: prev.firstName || data.firstName || "",
@@ -59,8 +56,7 @@ export default function AcceptInvite() {
         }));
       })
       .catch((e) => {
-        console.warn("invite preview failed", e);
-        setPreviewState("error");
+        console.warn("invite details fetch failed", e);
       });
   }, [formData.token]);
 
@@ -77,6 +73,7 @@ export default function AcceptInvite() {
       return;
     }
 
+    setErrorText(null);
     setIsLoading(true);
     try {
       await registerInvited({
@@ -88,10 +85,12 @@ export default function AcceptInvite() {
       toast({ title: "Success", description: "You're all set!" });
       router.push("/dashboard");
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to accept invite";
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to accept invite",
+        description: msg,
       });
+      setErrorText(msg);
     } finally {
       setIsLoading(false);
     }
@@ -115,50 +114,18 @@ export default function AcceptInvite() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="token">Invitation token</Label>
-          <Input id="token" value={formData.token} onChange={handleChange} required disabled={isLoading} />
-        </div>
 
-        {formData.token && (
-          <div className="rounded-md border p-4 text-sm">
-            {previewState === "loading" && <div className="text-muted-foreground">Loading invite…</div>}
-            {previewState === "error" && (
-              <div className="text-red-600">Unable to load invite preview. The token may be invalid or expired.</div>
-            )}
-            {previewState === "loaded" && preview && (
-              <div className="space-y-1">
-                {preview.companyName && (
-                  <div>
-                    <span className="text-muted-foreground">Company: </span>
-                    <span className="font-medium">{preview.companyName}</span>
-                  </div>
-                )}
-                {preview.email && (
-                  <div>
-                    <span className="text-muted-foreground">Invited email: </span>
-                    <span className="font-medium">{preview.email}</span>
-                  </div>
-                )}
-                {preview.roles && preview.roles.length > 0 && (
-                  <div>
-                    <span className="text-muted-foreground">Roles: </span>
-                    <span className="font-medium">{preview.roles.join(', ')}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First name (optional)</Label>
-            <Input id="firstName" value={formData.firstName} onChange={handleChange} disabled={isLoading} />
+            <Label htmlFor="firstName">First name</Label>
+            <Input id="firstName" value={formData.firstName} onChange={handleChange} disabled={isLoading || Boolean(preview?.firstName)} readOnly={Boolean(preview?.firstName)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last name (optional)</Label>
-            <Input id="lastName" value={formData.lastName} onChange={handleChange} disabled={isLoading} />
+            <Label htmlFor="lastName">Last name</Label>
+            <Input id="lastName" value={formData.lastName} onChange={handleChange} disabled={isLoading || Boolean(preview?.lastName)} readOnly={Boolean(preview?.lastName)} />
           </div>
         </div>
 
@@ -195,6 +162,11 @@ export default function AcceptInvite() {
         <Button type="submit" className="h-11 w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Accept invite
         </Button>
+        {errorText && (
+          <div className="text-sm text-red-600 mt-2" role="alert">
+            {errorText}
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

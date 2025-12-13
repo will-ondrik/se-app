@@ -1,11 +1,15 @@
 'use client';
 
+import { useEffect, useState } from "react";
+
 import { ArrowLeft, MapPin, Calendar, Users, Wrench, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockJobs, mockUsers, mockTools, getStatusBadgeColor } from "@/lib/mock-data";
+import { getStatusBadgeColor } from "@/lib/ui-mappers";
+import { fetchJobById, fetchUsers, fetchTools } from "@/services/app-data";
+import type { Job, User, Tool } from "@/types/app/types";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -15,14 +19,37 @@ export default function JobDetail({ params }: { params: { jobId: string } }) {
   const { jobId } = params;
   const router = useRouter();
 
-  const job = mockJobs.find(j => j.id === jobId);
-  
+  const [job, setJob] = useState<Job | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([fetchJobById(jobId), fetchUsers(), fetchTools()])
+      .then(([j, u, t]) => {
+        if (!mounted) return;
+        setJob(j);
+        setUsers(Array.isArray(u) ? u : []);
+        setTools(Array.isArray(t) ? t : []);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [jobId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   if (!job) {
     return <div>Job not found</div>;
   }
 
-  const crewMembers = mockUsers.filter(u => job.assignedCrewIds.includes(u.id));
-  const assignedTools = mockTools.filter(t => job.toolIds.includes(t.id));
+  const crewMembers = users.filter(u => job.assignedCrewIds.includes(u.id));
+  const assignedTools = tools.filter(t => job.toolIds.includes(t.id));
 
   return (
     <ProtectedRoute requiredPermissions={["VIEW_JOBS"] as Permission[]}>

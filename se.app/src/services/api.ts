@@ -1,4 +1,5 @@
-import type { Session, User, Role, Permission } from '@/types/app/types';
+import type { Session, User, Role, Permission, UserInvite } from '@/types/app/types';
+import type { Project } from '@/types/kpi_dashboard/types';
 
 // Base API URL (include version segment). Example: http://localhost:8080/api/v1
 const API_BASE: string = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1').replace(/\/$/, '');
@@ -184,6 +185,34 @@ export async function resetPassword(token: string, newPassword: string) {
   return res.json();
 }
 
+// Invite user (admin/owner action)
+export interface InviteUserDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: Role[];
+}
+
+export async function postInviteUser(dto: InviteUserDto) {
+  const res = await fetch(buildUrl('/auth/invite'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(dto),
+  });
+
+  if (!res.ok) {
+    let msg = 'Invite failed';
+    try {
+      msg = parseErrorBody(await res.json());
+    } catch {}
+    throw new Error(msg);
+  }
+
+  // Gin returns { message: "user invited" }
+  return res.json();
+}
+
 // Optional helper for showing invite context before submission
 export interface InvitePreview {
   email?: string;
@@ -206,4 +235,168 @@ export async function getInvitePreview(token: string): Promise<InvitePreview> {
     throw new Error(msg);
   }
   return res.json();
+}
+
+// Pending invite details for accept-invite page
+export interface PendingInviteDetails {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export async function getPendingInviteDetails(token: string): Promise<PendingInviteDetails> {
+  const url = buildUrl(`/user/pending-details/${encodeURIComponent(token)}`);
+  const res = await fetch(url, { credentials: 'include' });
+  if (!res.ok) {
+    let msg = 'Failed to load invite details';
+    try {
+      msg = parseErrorBody(await res.json());
+    } catch {}
+    throw new Error(msg);
+  }
+  try {
+    const body = await res.json();
+    return (body && (body.data ?? body)) as PendingInviteDetails;
+  } catch {
+    return {} as PendingInviteDetails;
+  }
+}
+
+/**
+ * KPI Analytics: fetch projects from backend.
+ * Expects server to return the same shape as mock data (dates as strings).
+ * Normalizes:
+ *  - startDate/endDate -> Date
+ *  - businessType.type -> lowercase (BusinessTypeEnum)
+ *  - labour.projectedHours/actualHours -> rounded to 1 decimal
+ */
+export async function getKpiProjects(): Promise<Project[]> {
+  try {
+    const res = await fetch(buildUrl('/reports/kpi-analytics'), {
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      // Surface a controlled empty result; caller may show "data unavailable"
+      return [];
+    }
+
+    const body = await res.json();
+    const items: any[] = Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : []);
+
+    return items.map((project: any, index: number) => ({
+      ...project,
+      id: project?.id ?? String(index + 1),
+      startDate: project?.startDate ? new Date(project.startDate) : new Date(),
+      endDate: project?.endDate ? new Date(project.endDate) : new Date(),
+      businessType: {
+        ...(project?.businessType ?? {}),
+        type: (project?.businessType?.type ?? '').toLowerCase(),
+      },
+      labour: {
+        ...(project?.labour ?? {}),
+        projectedHours: Math.round(((project?.labour?.projectedHours ?? 0) as number) * 10) / 10,
+        actualHours: Math.round(((project?.labour?.actualHours ?? 0) as number) * 10) / 10,
+      },
+    })) as Project[];
+  } catch (err) {
+    console.error('getKpiProjects failed:', err);
+    return [];
+  }
+}
+
+// Company profile & logo endpoints
+export interface CompanyProfileDto {
+  companyName: string;
+  email: string;
+  phone?: string;
+  website?: string;
+}
+
+export async function saveCompanyProfile(dto: CompanyProfileDto) {
+  const res = await fetch(buildUrl('/company/profile'), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(dto),
+  });
+
+  if (!res.ok) {
+    let msg = 'Failed to save company profile';
+    try {
+      msg = parseErrorBody(await res.json());
+    } catch {}
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+
+export async function uploadCompanyLogo(file: File) {
+  // Convert file to base64 so backend can persist bytes in DB
+  const dataUrl: string = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+  const mimeType = file.type || 'application/octet-stream';
+  const fileName = file.name || 'logo';
+
+  const res = await fetch(buildUrl('/company/logo'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ fileName, mimeType, base64 }),
+  });
+
+  if (!res.ok) {
+    let msg = 'Failed to upload logo';
+    try {
+      msg = parseErrorBody(await res.json());
+    } catch {}
+    throw new Error(msg);
+  }
+
+  // Some backends may not return a JSON body. Safely attempt to parse.
+  try {
+    return await res.json();
+  } catch {
+    return {} as any;
+  }
+}
+
+// User pending invites
+export async function getPendingInvites(): Promise<UserInvite[]> {
+  try {
+    const res = await fetch(buildUrl('/user/pending-invites'), {
+      credentials: 'include',
+    });
+    if (!res.ok) return [];
+
+    const body = await res.json();
+    const items = Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : []);
+    return (items ?? []) as UserInvite[];
+  } catch (err) {
+    console.error('getPendingInvites failed:', err);
+    return [];
+  }
+}
+
+// Team members for the current company (derived from cookie/session)
+export async function getTeamMembers(): Promise<User[]> {
+  try {
+    const res = await fetch(buildUrl('/user/team-members'), {
+      credentials: 'include',
+    });
+    if (!res.ok) return [];
+
+    const body = await res.json();
+    const items = Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : []);
+    return (items ?? []) as User[];
+  } catch (err) {
+    console.error('getTeamMembers failed:', err);
+    return [];
+  }
 }

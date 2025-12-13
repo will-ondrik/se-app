@@ -16,12 +16,14 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorText(null);
     setIsLoading(true);
 
     try {
@@ -29,10 +31,12 @@ export default function Login() {
       toast({ title: 'Success', description: 'Logged in successfully' });
       router.push('/dashboard');
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to login';
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to login',
+        description: msg,
       });
+      setErrorText(msg);
     } finally {
       setIsLoading(false);
     }
@@ -43,12 +47,19 @@ export default function Login() {
       title="Welcome back"
       description="Sign in to your account"
       footer={
-        <span>
-          Don't have an account?{' '}
-          <Link href="/register-first" className="font-medium text-primary hover:underline">
-            Sign up
-          </Link>
-        </span>
+        <div className="space-y-1">
+          <span>
+            Don't have an account?{' '}
+            <Link href="/register-first" className="font-medium text-primary hover:underline">
+              Sign up
+            </Link>
+          </span>
+          <div>
+            <Link href="/reset-password" className="font-medium text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -76,9 +87,6 @@ export default function Login() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/reset-password" className="text-xs text-primary hover:underline">
-              Forgot password?
-            </Link>
           </div>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -106,6 +114,11 @@ export default function Login() {
         <Button type="submit" className="h-11 w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Log In
         </Button>
+        {errorText && (
+          <div className="text-sm text-red-600 mt-2" role="alert">
+            {errorText}
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

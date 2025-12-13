@@ -10,6 +10,16 @@ export interface Crew {
   id: number;
   name: string;
   colorHex?: string;
+  // new fields for v2 management
+  crewType?: 'single' | 'multi';
+  size?: number; // if multi, number of people; defaults to 1
+  memberIds?: number[]; // selected employee ids
+}
+
+export interface Employee {
+  id: number;
+  name: string;
+  role?: string;
 }
 
 export interface Job {
@@ -32,4 +42,4 @@ export interface Job {
   integrationExternalId?: string | null;
 }
 
-export type DateRangeOption = "week" | "2weeks" | "month";
+export type DateRangeOption = "week" | "2weeks" | "month" | "quarter" | "6months" | "year";

@@ -138,6 +138,13 @@ export function TeamLeadersAnalytics({ projects }: TeamLeadersAnalyticsProps) {
         </div>
       </div>
 
+      {leaderMetrics.length === 0 ? (
+        <Card className="p-6 bg-card border-border/50">
+          <p className="text-muted-foreground">No data available for team leaders analytics.</p>
+        </Card>
+      ) : (
+        <>
+      
       {/* Team Averages KPI Cards */}
       {teamAverages && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -317,6 +324,8 @@ export function TeamLeadersAnalytics({ projects }: TeamLeadersAnalyticsProps) {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }

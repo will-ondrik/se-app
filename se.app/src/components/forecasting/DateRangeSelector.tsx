@@ -20,6 +20,9 @@ export const DateRangeSelector = ({
     { value: "week", label: "Week" },
     { value: "2weeks", label: "2 Weeks" },
     { value: "month", label: "Month" },
+    { value: "quarter", label: "Quarter" },
+    { value: "6months", label: "6 Months" },
+    { value: "year", label: "Year" },
   ];
 
   return (

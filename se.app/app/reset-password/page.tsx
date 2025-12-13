@@ -23,19 +23,26 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
   const isResetMode = !!token;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorText(null);
+
+    // Validate before starting async action
+    if (isResetMode && password !== confirmPassword) {
+      const msg = "Passwords do not match";
+      toast({ title: "Error", description: msg });
+      setErrorText(msg);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (isResetMode) {
-        if (password !== confirmPassword) {
-          toast({ title: "Error", description: "Passwords do not match" });
-          return;
-        }
         await resetPassword(token, password);
         toast({ title: "Success", description: "Password reset. Please log in." });
         router.push("/login");
@@ -47,7 +54,9 @@ export default function ResetPasswordPage() {
         });
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || "Request failed" });
+      const msg = err?.message || "Request failed";
+      toast({ title: "Error", description: msg });
+      setErrorText(msg);
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +136,11 @@ export default function ResetPasswordPage() {
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isResetMode ? "Reset password" : "Send reset link"}
         </Button>
+        {errorText && (
+          <div className="text-sm text-red-600 mt-2" role="alert">
+            {errorText}
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

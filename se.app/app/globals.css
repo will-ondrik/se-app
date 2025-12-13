@@ -26,8 +26,9 @@
     --muted: 210 20% 96%;
     --muted-foreground: 215 15% 40%;
 
-    --accent: 27 87% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent now aligned with neutral/primary palette (no orange) */
+    --accent: 210 20% 96%;
+    --accent-foreground: 215 25% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -84,8 +85,9 @@
     --muted: 215 25% 18%;
     --muted-foreground: 215 15% 60%;
 
-    --accent: 27 87% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent now aligned with neutral/primary palette (no orange) */
+    --accent: 215 25% 18%;
+    --accent-foreground: 210 20% 90%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -185,4 +187,56 @@
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground; }
+}
+
+/* 4) Utilities for forecasting v2 */
+@layer utilities {
+  /* Crew color utilities */
+  .bg-crew-teal { background-color: hsl(var(--crew-teal)); }
+  .bg-crew-coral { background-color: hsl(var(--crew-coral)); }
+  .bg-crew-amber { background-color: hsl(var(--crew-amber)); }
+  .bg-crew-indigo { background-color: hsl(var(--crew-indigo)); }
+  .bg-crew-emerald { background-color: hsl(var(--crew-emerald)); }
+  .bg-crew-slate { background-color: hsl(var(--crew-slate)); }
+
+  .text-crew-teal { color: hsl(var(--crew-teal)); }
+  .text-crew-coral { color: hsl(var(--crew-coral)); }
+  .text-crew-amber { color: hsl(var(--crew-amber)); }
+  .text-crew-indigo { color: hsl(var(--crew-indigo)); }
+  .text-crew-emerald { color: hsl(var(--crew-emerald)); }
+  .text-crew-slate { color: hsl(var(--crew-slate)); }
+
+  .border-crew-teal { border-color: hsl(var(--crew-teal)); }
+  .border-crew-coral { border-color: hsl(var(--crew-coral)); }
+  .border-crew-amber { border-color: hsl(var(--crew-amber)); }
+  .border-crew-indigo { border-color: hsl(var(--crew-indigo)); }
+  .border-crew-emerald { border-color: hsl(var(--crew-emerald)); }
+  .border-crew-slate { border-color: hsl(var(--crew-slate)); }
+
+  /* Status colors */
+  .text-status-optimal { color: hsl(var(--status-optimal)); }
+  .text-status-warning { color: hsl(var(--status-warning)); }
+  .text-status-critical { color: hsl(var(--status-critical)); }
+
+  .bg-status-warning { background-color: hsl(var(--status-warning)); }
+  .bg-status-critical { background-color: hsl(var(--status-critical)); }
+
+  .ring-status-optimal { --tw-ring-color: hsl(var(--status-optimal)); }
+  .ring-status-warning { --tw-ring-color: hsl(var(--status-warning)); }
+  .ring-status-critical { --tw-ring-color: hsl(var(--status-critical)); }
+
+  /* Utilization helpers */
+  .bg-utilization-high { background-color: hsl(var(--success)); }
+  .bg-utilization-medium { background-color: hsl(var(--warning)); }
+  .bg-utilization-low { background-color: hsl(var(--destructive)); }
+
+  .text-utilization-high { color: hsl(var(--success)); }
+  .text-utilization-medium { color: hsl(var(--warning)); }
+  .text-utilization-low { color: hsl(var(--destructive)); }
+
+  /* Analytics panel background */
+  .bg-analytics-bg { background-color: hsl(var(--muted)); }
+
+  /* Misc */
+  .writing-mode-vertical { writing-mode: vertical-rl; }
 }

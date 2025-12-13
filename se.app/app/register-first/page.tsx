@@ -23,6 +23,7 @@ export default function RegisterFirst() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
   const { registerFirst } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -35,6 +36,7 @@ export default function RegisterFirst() {
       return;
     }
 
+    setErrorText(null);
     setIsLoading(true);
     try {
       await registerFirst({
@@ -47,10 +49,12 @@ export default function RegisterFirst() {
       toast({ title: "Success", description: "Account created successfully" });
       router.push("/dashboard");
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to create account";
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create account",
+        description: msg,
       });
+      setErrorText(msg);
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +132,11 @@ export default function RegisterFirst() {
         <Button type="submit" className="h-11 w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Create account
         </Button>
+        {errorText && (
+          <div className="text-sm text-red-600 mt-2" role="alert">
+            {errorText}
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

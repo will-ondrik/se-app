@@ -24,6 +24,7 @@ export default function RegisterInvited() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
   const { registerInvited } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -49,6 +50,7 @@ export default function RegisterInvited() {
       return;
     }
 
+    setErrorText(null);
     setIsLoading(true);
     try {
       await registerInvited({
@@ -60,10 +62,12 @@ export default function RegisterInvited() {
       toast({ title: "Success", description: "You're all set!" });
       router.push('/dashboard');
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to accept invite';
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to accept invite',
+        description: msg,
       });
+      setErrorText(msg);
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +140,11 @@ export default function RegisterInvited() {
         <Button type="submit" className="h-11 w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Accept invite
         </Button>
+        {errorText && (
+          <div className="text-sm text-red-600 mt-2" role="alert">
+            {errorText}
+          </div>
+        )}
       </form>
     </AuthLayout>
   );

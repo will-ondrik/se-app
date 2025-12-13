@@ -144,6 +144,16 @@ export const ProjectsTable = ({ projects, onRowClick }: ProjectsTableProps) => {
     a.click();
   };
 
+  if (projects.length === 0) {
+    return (
+      <Card className="p-6 bg-card border-border/50 shadow-sm">
+        <div className="h-48 flex items-center justify-center text-muted-foreground">
+          No data available
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-6 bg-card border-border/50 shadow-sm">
       <div className="space-y-4">

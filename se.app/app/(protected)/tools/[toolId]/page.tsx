@@ -1,28 +1,48 @@
 'use client';
 
+import { useEffect, useRef, useState } from "react";
+
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, QrCode, Download, Wrench, User, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockTools, mockJobs, getConditionBadgeColor } from "@/lib/mock-data";
+import { getConditionBadgeColor } from "@/lib/ui-mappers";
+import { fetchToolById, fetchJobById } from "@/services/app-data";
+import type { Tool, Job } from "@/types/app/types";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import QRCodeSVG from "react-qr-code";
-import { useRef } from "react";
 
 export default function ToolDetailPage() {
   const params = useParams<{ toolId: string }>();
   const toolId = params.toolId as string;
   const router = useRouter();
   const qrRef = useRef<HTMLDivElement>(null);
-  
-  const tool = mockTools.find(t => t.id === toolId);
-  
-  if (!tool) {
-    return <div>Tool not found</div>;
-  }
 
-  const assignedJob = tool.jobId ? mockJobs.find(j => j.id === tool.jobId) : null;
+  const [tool, setTool] = useState<Tool | null>(null);
+  const [assignedJob, setAssignedJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const t = await fetchToolById(toolId);
+      if (!mounted) return;
+      setTool(t);
+      if (t?.jobId) {
+        const j = await fetchJobById(t.jobId);
+        if (!mounted) return;
+        setAssignedJob(j);
+      }
+      setLoading(false);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [toolId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!tool) return <div>Tool not found</div>;
 
   const handleDownloadQR = () => {
     const svg = qrRef.current?.querySelector('svg');
